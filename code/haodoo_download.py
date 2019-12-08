@@ -59,12 +59,21 @@ def parseBookNames(data, start_index, author_info):
         index_find_end = len(data)
 
     while (True):
-        index = data.find(book_ref_key1, start_index, index_find_end)
-        if (index < 0):
-            index = data.find(book_ref_key2, start_index, index_find_end)
-        if (index < 0):
+        index1 = data.find(book_ref_key1, start_index, index_find_end)
+        index2 = data.find(book_ref_key2, start_index, index_find_end)
+        if ((index1 < 0) and (index2 < 0)):
             break
             
+        if (index1 < 0):
+            index = index2
+        elif (index2 < 0):
+            index = index1
+        else:
+            if (index1 < index2):
+                index = index1
+            else:
+                index = index2                
+        
         index2 = data.find('\">', index, index + 50)    
         if (index2 < 0):
             break
@@ -173,6 +182,8 @@ def parseBookContent(htmlData, book_name, author_name, category_name, downloadIn
         downloadFile(downloadInstance, 'DownloadUpdb', htmlData, index3, book_name, author_name, category_name)
         downloadFile(downloadInstance, 'DownloadEpub', htmlData, index3, book_name, author_name, category_name)
         downloadFile(downloadInstance, 'DownloadVEpub', htmlData, index3, book_name, author_name, category_name)
+        
+        # uncomment this line if you want download mobi format as well
         downloadFile(downloadInstance, 'DownloadMobi', htmlData, index3, book_name, author_name, category_name)        
         
         index = index3
@@ -227,6 +238,7 @@ if __name__ == '__main__':
     downloadInstance = htmlDownLoad('http://www.haodoo.net/')
             
     sub_url_list = ['?M=hd&P=100', '世紀百強', '?M=hd&P=wisdom', '隨身智囊', '?M=hd&P=history', '歷史煙雲', '?M=hd&P=martial', '武俠小說', '?M=hd&P=mystery', '懸疑小說', '?M=hd&P=romance', '言情小說', '?M=hd&P=scifi', '奇幻小說', '?M=hd&P=fiction', '小說園地']    
+    # sub_url_list = ['?M=hd&P=martial', '武俠小說']    
     for index in range(0, len(sub_url_list), 2):
         sub_url = sub_url_list[index]
         print('index: %d; sub-url: %s; title: %s' % (index, sub_url, sub_url_list[index + 1]))
@@ -235,7 +247,6 @@ if __name__ == '__main__':
         if (not content):
             continue
             
-        # parseContent(content, sub_url_list[index + 1])    
         author_list = parseParentContent(content)
         for author_info in author_list:
             for book_info in author_info.books_:
